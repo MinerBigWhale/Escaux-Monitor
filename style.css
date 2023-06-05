@@ -1,0 +1,182 @@
+
+html {
+	font-size: 100%;
+}
+
+html,
+body {
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	width: 100vw;
+	height: 99vh;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	border-bottom: 1vh solid #3587b2;
+}
+
+.box {
+	border: 1px solid black;
+	border: none;
+}
+
+.box {
+	position: relative;
+	overflow: hidden;
+	display: inline-block;
+	width: 24rem;
+	height: 15rem;
+	margin: 0 5px;
+	font-size: 1rem;
+}
+
+.box#donut--1,
+.box#gauge--1 {
+	width: 23.6rem;
+	height: 15rem;
+}
+.box#table--1 {
+	width: 100%;
+	height: 100%;
+}
+
+.mask {
+	position: relative;
+	overflow: hidden;
+	display: block;
+	width: 20em;
+	height: 10em;
+	margin: 2em;
+}
+
+.mask .semi-circle {
+	position: relative;
+	display: block;
+	width: 20em;
+	height: 10em;
+	background: linear-gradient(to right, #2a9d8f 0%, #e9c46a 50%, #e76f51 100%);
+	border-radius: 50% 50% 50% 50%/100% 100% 0% 0%;
+}
+
+.mask .semi-circle::before {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	z-index: 2;
+	display: block;
+	width: 14em;
+	height: 7em;
+	margin-left: -7em;
+	background: #fff;
+	border-radius: 50% 50% 50% 50%/100% 100% 0% 0%;
+}
+
+.mask .semi-circle--mask {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 20em;
+	height: 20em;
+	background: transparent;
+	transform: rotate(0deg) translate3d(0, 0, 0);
+	transform-origin: center center;
+	backface-visibility: hidden;
+	transition: transform 1s ease-in-out;
+}
+
+.mask .semi-circle--mask::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	display: block;
+	width: 20.2em;
+	height: 10.2em;
+	margin: -.1em 0 0 -.1em;
+	background: #f2f2f2;
+	border-radius: 50% 50% 50% 50%/100% 100% 0% 0%;
+}
+
+.legend {
+	z-index: 4;
+	font-family: 'Goldman', cursive, arial;
+	position: relative;
+	overflow: hidden;
+	display: block;
+	width: 10em;
+	height: 6em;
+	margin: 2em;
+	top: -7em;
+	right: -5em;
+}
+
+.text {
+	z-index: 4;
+	font-family: 'Goldman', cursive, arial;
+	position: relative;
+	overflow: hidden;
+	display: block;
+	width: 10em;
+	height: 10em;
+	margin: 2em;
+	top: 0em;
+	right: -5em;
+}
+
+.title {
+	font-family: 'Goldman', cursive, arial;
+	font-size: 2.5em;
+	height: 1.2em;
+	line-height: 1.2em;
+	text-align: center;
+	margin: 0;
+}
+
+.legend .value,
+.text .value {
+	color: #3587b2;
+	font-size: 2.5em;
+	text-align: center;
+	position: relative;
+	display: block;
+	width: 4em;
+	height: 1.2em;
+	line-height: 1.2em;
+}
+
+.legend .description,
+.text .description {
+	color: #777;
+	font-size: 1.4em;
+	position: relative;
+	text-align: center;
+	display: block;
+	width: 7em;
+	height: 3em;
+	line-height: 1.1em;
+}
+			
+.simple-table th {
+    background-color: #333;
+    color: #FDFDFD;
+}
+.simple-table tr:nth-child(even) {
+	 background-color:  #DDD;
+}
+
+th, td {
+    padding: 5px;
+    text-align: left;
+}
+  
+.simple-table {
+	width: 100%;
+	height:100%;
+}

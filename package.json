@@ -1,0 +1,20 @@
+{
+  "name": "escaux-monitor",
+  "version": "1.0.0",
+  "description": "An Electron app to monitor various Escaux Features using Escaux API",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "package": "electron-packager . escaux-monitor --platform=win32 --arch=x64 --out=out --ignore='^/dist$' --ignore='^/out$' --prune --icon=./scripts/foldercharts.ico"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^24.3.1"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.2.2"
+  }
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electron App</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Goldman&display=swap"/>
+</head>
+<body>
+  <header>
+  	<nav>
+  		<label name="site">Site
+  			<select name="site">
+  				<option value=placeholder>placeholder</option>
+  			</select>
+  		</label>
+  		
+  		<label name="queue">Queue
+  			<select name="queue">
+  				<option value=placeholder>placeholder</option>
+  			</select>
+  		</label>
+  	</nav>
+  </header>
+  <div id="container">
+	<table style="width:100%;height:100%;" cellspacing="25" cellpadding="5">
+		<tr>
+			<td style="width: 50%; height: 30%;border-right: 3px solid #3587b2;">
+				<div class="box" id="donut--1">
+					<canvas id="donut--1-c"></canvas>
+				</div>
+			</td>
+			<td style="width: 50%; height: 30%;">
+				<div class="box" id="gauge--1">
+					<div class="mask">
+						<div class="semi-circle"></div>
+						<div class="semi-circle--mask"></div>
+					</div>
+					<div class="legend">
+						<Span class="value">0</Span>
+						<Span class="description"></Span>
+					</div>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="width: 100%; height: 70%;border-top: 3px solid #3587b2;">
+				<div class="box" id="table--1">
+					<table class="simple-table">
+						<tr>
+						  <th style="width=35%;">User</th>
+						  <th style="width=15%;">Type</th>
+						  <th style="width=20%;">Phone</th>
+						  <th style="width=30%;">Status</th>
+						</tr>
+						<tr>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+  </div>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script>
+	Chart.register(ChartDataLabels);
+	var donut1 = new Chart("donut--1-c", {
+		type: "doughnut",
+		data: {
+			labels: ['waiting','online','ringing','pause'],
+			datasets: [{
+				backgroundColor: ["#2b919e", "#80b07d", "#e9c46a", "#e67255"],
+				data: [0, 0, 0, 0]
+			}]
+		},
+		options: {
+			plugins: {
+				title: {
+					display: false,
+				},
+				datalabels: {
+					font: {
+						family: "'Goldman', cursive, arial",
+						size: 15
+					},
+					display: function (context) {
+						return context.dataset.data[context.dataIndex] !== 0;
+					}
+				}
+			},
+			responsive: true,
+			maintainAspectRatio: false
+		}
+	});
+	
+	var _site, _queue
+	var _users = { 'status' : {'waiting':0, 'online':0, 'ringing':0, 'pause':0}}
+	var _task = []
+	var _maxcalls = 5
+	var _status = {1:'waiting', 2:'online',6:'ringing','pause':'pause'}
+	
+	//Handle selection changes
+	document.getElementsByName('site')[1].addEventListener('change',(event) => {
+		const selectedOption = event.target.selectedOptions[0].value
+		console.log('Selected site:', selectedOption)
+		_site = selectedOption
+		window.api.invoke('SetSite',selectedOption)
+	});
+	document.getElementsByName('queue')[1].addEventListener('change',(event) => {
+		const selectedOption = event.target.selectedOptions[0].value
+		console.log('Selected queue:', selectedOption)
+		_queue = selectedOption
+		window.api.invoke('SetQueue',selectedOption)
+		refresh()
+	});
+	
+	//Load select content	
+	init = () => {
+		window.api.invoke('GetSites').then((data) => {
+		  console.log(typeof data, data);
+		  const siteinput = document.getElementsByName('site')[1]
+		  siteinput.innerHTML = '<option>select a site</option>'
+		  for (let site of data.Sites){
+			const newoption = document.createElement('option')
+			newoption.value = site.Value
+			newoption.innerText = site.Name
+			if (site.Value == _site) { 
+				newoption.selected = 'selected'
+			}
+			siteinput.appendChild(newoption)
+		  }
+		});
+		window.api.invoke('GetQueues').then((data) => {
+		  console.log(typeof data, data);
+		  const queueinput = document.getElementsByName('queue')[1]
+		  queueinput.innerHTML = '<option>select a queue</option>'
+		  for (let queue of data.Queues){
+			const newoption = document.createElement('option')
+			newoption.value = queue.Name
+			newoption.innerText = queue.Name
+			if (queue.Name == _queue) { 
+				newoption.selected = 'selected'
+			}
+			queueinput.appendChild(newoption)
+		  }
+		});
+		
+	}
+	
+	//Load Queue Data
+	refresh = () => {
+		if (typeof _queue != "undefined"){
+			window.api.invoke('GetQueueMembers').then((data) => {
+				console.table(data.Members);
+				document.querySelector('#table--1 .simple-table').innerHTML = '<tr> <th style="width=35%;">User</th> <th style="width=15%;">Type</th> <th style="width=20%;">Phone</th> <th style="width=30%;">Status</th> </tr>';
+				
+				_users.status.waiting = 0
+				_users.status.online = 0
+				_users.status.ringing = 0
+				_users.status.pause = 0
+				
+				for (let member of data.Members) { 
+					let user = document.createElement('td')
+					user.innerHTML = member.Name
+					let type = document.createElement('td')
+					type.innerHTML = member.Membership
+					let phone = document.createElement('td')
+					phone.innerHTML = member.Ext +' ('+ member.Phone +')'
+					let status = document.createElement('td')
+					let statusstr = (member.Pause) ? _status['pause'] : _status[member.Status]
+					_users.status[statusstr] ++
+					status.innerHTML = statusstr
+					let row = document.createElement('tr')
+					row.appendChild(user)
+					row.appendChild(type)
+					row.appendChild(phone)
+					row.appendChild(status)
+					document.querySelector('#table--1 tbody').appendChild(row)
+				}
+				
+				var donutdata1 = [_users.status.waiting, _users.status.online, _users.status.ringing, _users.status.pause];
+				donut1.data.datasets[0].data = donutdata1;
+				donut1.update();
+			});
+			window.api.invoke('GetQueuecalls').then((data) => {
+				console.table(data);
+				let gaugedata1 = data.Calls;
+				let gaugedeg1 = (gaugedata1 > _maxcalls) ? 180 : gaugedata1 / _maxcalls * 180;
+                $('#gauge--1 .semi-circle--mask').attr({
+                    style: '-webkit-transform: rotate(' + gaugedeg1 + 'deg);' +
+                        '-moz-transform: rotate(' + gaugedeg1 + 'deg);' +
+                        'transform: rotate(' + gaugedeg1 + 'deg);'
+                });
+                document.querySelector('#gauge--1 .value').innerHTML = gaugedata1;
+			});
+		}
+	}
+	
+	init();
+	_task.push(window.setInterval(refresh, 1 * 1000))
+   </script>
+</body>
+</html>
