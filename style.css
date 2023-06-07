@@ -1,6 +1,7 @@
 
 html {
 	font-size: 100%;
+    font-family: arial;
 }
 
 html,
@@ -9,6 +10,12 @@ body {
 	height: 100vh;
 	margin: 0;
 	padding: 0;
+}
+
+header {
+	padding: 3px 10px;
+    background-color: black;
+    color: white;
 }
 
 .container {
