@@ -5,36 +5,75 @@ const fs = require("fs");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win, site, queue;
+let win, site, queue, version;
 
 String.prototype.xml2json = function () {
     const parser = new XMLParser();
 	return parser.parse(this);
 };
 
-async function createWindow() {
-
-  // Create the browser window.
-  win = new BrowserWindow({
-    width: 900,
-    height: 600,
-	icon: __dirname + '/scripts/foldercharts.ico',
-    webPreferences: {
-      nodeIntegration: false, // is default value after Electron v5
-      contextIsolation: true, // protect against prototype pollution
-      enableRemoteModule: false, // turn off remote
-      preload: path.join(__dirname, "preload.js") // use a preload script
-    }
+async function Init() {
+	
+  // Check for new version 
+  version = app.getVersion()
+  var splash = new BrowserWindow({
+     width: 500, 
+     height: 150, 
+     transparent: true, 
+     frame: false, 
+     alwaysOnTop: true 
   });
+  splash.loadFile('splash.html');
+  splash.center();
+	setTimeout( () => {
+	  fetch('https://api.github.com/repos/MinerBigWhale/Escaux-Monitor/releases', { 
+				headers: {
+					'Accept' : 'application/vnd.github.v3+json'
+				}})
+		.then(response => response.json()) //Converting the response to a JSON object
+		.then( data => {
+		  console.log(data[0].tag_name)
+		  if (parseInt(data[0].tag_name.substr(data[0].tag_name - 4)) > parseInt(version.substr(version.length - 4))){
+			console.log('new version '+data[0].tag_name+' is availiable to download.')
+			console.log('-- app need to be updated')
+		  }
+		  else {
+			console.log('-- app is up to date')
+		  }
+		  // Create the browser window.
+		  win = new BrowserWindow({
+			width: 900,
+			height: 600,
+			title: 'Escaux-Monitor-v' + version,
+			show: false,
+			icon: __dirname + '/scripts/foldercharts.ico',
+			webPreferences: {
+			  nodeIntegration: false, // is default value after Electron v5
+			  contextIsolation: true, // protect against prototype pollution
+			  enableRemoteModule: false, // turn off remote
+			  preload: path.join(__dirname, "preload.js") // use a preload script
+			}
+		  });
 
-  // Load app
-  win.loadFile(path.join(__dirname, "index.html"));
+		  // Load app
+		  win.loadFile(path.join(__dirname, "index.html"));
 
-  //win.webContents.openDevTools(); // Open the DevTools (optional)
-  
-  win.on('closed', () => {
-    win = null
-  })
+		  //win.webContents.openDevTools(); // Open the DevTools (optional)
+		  
+		  win.once('ready-to-show', () => {
+			splash.close()
+			win.show()
+		  })
+		  
+		  win.on('closed', () => {
+			win = null
+		  })
+		})
+		.catch(error => {
+		  console.error('Error:', error);
+		  app.quit()
+		});
+    }, 2000)
 }
 
 app.on('window-all-closed', () => {
@@ -45,11 +84,11 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (win === null) {
-    createWindow()
+    Init()
   }
 })
 
-app.on("ready", createWindow);
+app.on("ready", Init);
 
 // Listen for the request from the renderer process
 ipcMain.handle('GetQueues', async () => {
