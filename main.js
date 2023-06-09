@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const { XMLParser } = require('fast-xml-parser');
 const path = require("path");
 const fs = require("fs");
@@ -25,25 +25,37 @@ async function Init() {
   });
   splash.loadFile('splash.html');
   splash.center();
-	setTimeout( () => {
-	  fetch('https://api.github.com/repos/MinerBigWhale/Escaux-Monitor/releases', { 
-				headers: {
-					'Accept' : 'application/vnd.github.v3+json'
-				}})
-		.then(response => response.json()) //Converting the response to a JSON object
-		.then( data => {
-		  console.log(data[0].tag_name)
-		  if (parseInt(data[0].tag_name.substr(data[0].tag_name - 4)) > parseInt(version.substr(version.length - 4))){
-			console.log('new version '+data[0].tag_name+' is availiable to download.')
-			console.log('-- app need to be updated')
-		  }
-		  else {
-			console.log('-- app is up to date')
-		  }
+  fetch('https://api.github.com/repos/MinerBigWhale/Escaux-Monitor/releases', { 
+			headers: {
+				'Accept' : 'application/vnd.github.v3+json'
+			}})
+	.then(response => response.json()) //Converting the response to a JSON object
+	.then( data => {
+	  console.log(data[0].tag_name)
+	  if (parseInt(data[0].tag_name.substr(data[0].tag_name - 4)) > parseInt(version.substr(version.length - 4))){
+		console.log('new version '+data[0].tag_name+' is availiable to download.')
+		console.log('-- app need to be updated')
+		let options = {
+			type: 'info',
+			title: 'Update availiable',
+			message : 'A new version of Escaux-Monitor is availiable\n - current version: ' + version + '\n - New version: '+ data[0].tag_name + '\n\nDo you want to update now ?',
+			Buttons: ["Yes","Later"],
+			cancelId : 1
+		}
+		if (!dialog.showMessageBoxSync(options)){
+			
+		}
+	  }
+	  else {
+		console.log('-- app is up to date')
+	  }
+		  
+	  setTimeout( () => {
 		  // Create the browser window.
 		  win = new BrowserWindow({
 			width: 900,
 			height: 600,
+			minHeight: 500,
 			title: 'Escaux-Monitor-v' + version,
 			show: false,
 			icon: __dirname + '/scripts/foldercharts.ico',
@@ -68,12 +80,13 @@ async function Init() {
 		  win.on('closed', () => {
 			win = null
 		  })
-		})
-		.catch(error => {
-		  console.error('Error:', error);
-		  app.quit()
-		});
-    }, 2000)
+		  
+		}, 2000)
+	})
+	.catch(error => {
+	  console.error('Error:', error);
+	  app.quit()
+	});
 }
 
 app.on('window-all-closed', () => {
