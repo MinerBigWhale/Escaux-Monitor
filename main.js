@@ -11,7 +11,7 @@ String.prototype.xml2json = function () {
     const parser = new XMLParser();
 	return parser.parse(this);
 };
-
+ 
 async function Init() {
 	
   // Check for new version 
