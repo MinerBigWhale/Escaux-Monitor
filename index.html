@@ -48,7 +48,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" style="width: 100%; height: 70%;border-top: 3px solid #3587b2;">
+			<td colspan="2" style="width: 100%; height: 30%;border-top: 3px solid #3587b2;">
 				<div class="box" id="table--1">
 					<table class="simple-table">
 						<tr>
@@ -56,6 +56,26 @@
 						  <th style="width=15%;">Type</th>
 						  <th style="width=20%;">Phone</th>
 						  <th style="width=30%;">Status</th>
+						</tr>
+						<tr>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						  <td></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="width: 100%; height: 40%;border-top: 3px solid #3587b2;">
+				<div class="box" id="table--2">
+					<table class="simple-table">
+						<tr>
+						  <th style="width=20%;">Parent</th>
+						  <th style="width=20%;">Resource</th>
+						  <th style="width=50%;">Information</th>
+						  <th style="width=10%;">Duration</th>
 						</tr>
 						<tr>
 						  <td></td>
@@ -159,7 +179,7 @@
 			queueinput.appendChild(newoption)
 		  }
 		});
-		
+		monitor();
 	}
 	
 	//Load Queue Data
@@ -211,8 +231,36 @@
 			});
 		}
 	}
+	monitor = () => {
+		if (_refresh){
+			state_html = ['<b style="color:#32A017;">⬤ </b>','<b style="color:#DD3C3C;">⬤ </b>']
+			window.api.invoke('GetAlerts').then((data) => {
+				console.table(data.Alert);
+				document.querySelector('#table--2 .simple-table').innerHTML = '<tr> <th style="width=20%;">Parent</th> <th style="width=20%;">Resource</th> <th style="width=50%;">Information</th> <th style="width=10%;">Duration</th> </tr>';
+								
+				for (let alert of data.Alert) { 
+					let parent = document.createElement('td')
+					parent.innerHTML = state_html[alert.host.state] + alert.host.display_name
+					let resource = document.createElement('td')
+					resource.innerHTML = alert.display_name
+					let information = document.createElement('td')
+					information.className = "info"
+					information.innerHTML = alert.output
+					let duration = document.createElement('td')
+					duration.innerHTML = alert.duration
+					let row = document.createElement('tr')
+					row.appendChild(parent)
+					row.appendChild(resource)
+					row.appendChild(information)
+					row.appendChild(duration)
+					document.querySelector('#table--2 tbody').appendChild(row)
+				}
+			});
+		}
+	}
 	
 	init();
+	_task.push(window.setInterval(monitor, 30 * 1000))
 	_task.push(window.setInterval(refresh, 1 * 1000))
    </script>
 </body>

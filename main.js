@@ -104,6 +104,48 @@ app.on('activate', () => {
 app.on("ready", Init);
 
 // Listen for the request from the renderer process
+
+ipcMain.handle('GetAlerts', async () => {
+  console.log(' -> GetLogin /centreon/api/latest/login');
+  return await fetch('http://srv-centreon:80/centreon/api/latest/login', {
+	  method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+	  body: JSON.stringify({
+		  "security": {
+			"credentials": {
+			  "login": "peglau",
+			  "password": "20.UrianessUrianess"
+			}
+		  }
+		})
+	})
+    .then(response => response.json())
+    .then(async data => {
+      // Send the retrieved data back to the renderer process
+	  console.log(' -> GetAlerts /centreon/api/latest/monitoring/services');
+	  return await fetch('http://srv-centreon:80/centreon/api/latest/monitoring/services?limit=100&search={%22%24and%22%3A[{%22service.state%22%3A{%22%24eq%22%3A%222%22}}%2C{%22service.is_acknowledged%22%3A{%22%24eq%22%3A%22false%22}}]}', {
+          headers: {
+			"Content-Type": "application/json",
+			"X-AUTH-TOKEN": data.security.token
+		  }
+		})
+		.then(response => response.json())
+		.then(data => {
+		  // Send the retrieved data back to the renderer process
+		  return { Alert : data.result};
+		})
+		.catch(error => {
+		  console.error('Error:', error);
+		});
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+});
+
+
 ipcMain.handle('GetQueues', async () => {
   console.log(' -> GetQueues http://'+site+'/xml/dbGetQueueInfo.php');
   return await fetch('http://'+site+'/xml/dbGetQueueInfo.php')

@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld(
     "api", {
         invoke: (channel, data) => {
             // whitelist channels
-            let validChannels = ["GetQueues","SetQueue","GetQueueMembers","GetQueuecalls","GetSites","SetSite"];
+            let validChannels = ["GetQueues","SetQueue","GetQueueMembers","GetQueuecalls","GetSites","SetSite","GetAlerts"];
             if (validChannels.includes(channel)) {
                 return ipcRenderer.invoke(channel, data);
             }
